@@ -21,12 +21,21 @@ HEADERS += \
     qclinfo.h
 
 linux:!android {
-    message("* Using settings for Unix/Linux.")    
-}
-
-android {
+    message("* Using settings for Unix/Linux.")
+    LIBS += -lOpenCL
+} android {
     message("* Using settings for Android.")
     INCLUDEPATH += "$$PWD/CL/include"
     LIBS += -L "$$PWD/CL/lib/android/armv7"
+    LIBS += -lOpenCL
+} mac {
+    macx {
+        message ("* Using settings for OSX")
+        LIBS += -framework OpenCL
+    }
+    ios {
+        message ("* Using settings for iOS")
+        message ("iOS OpenCL framework doesn't exist even throught PrivateFramework un iPhoneOS SDK 11")
+    }
 }
-LIBS += -lOpenCL
+
