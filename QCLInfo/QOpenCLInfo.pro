@@ -37,5 +37,8 @@ linux:!android {
         message ("* Using settings for iOS")
         message ("iOS OpenCL framework doesn't exist even throught PrivateFramework un iPhoneOS SDK 11")
     }
+} win32 {
+    message ("* Using settings for Windows")
+    INCLUDEPATH += "$$PWD/CL/include"
+    LIBS +=C:/Windows/System32/OpenCL.dll
 }
-
