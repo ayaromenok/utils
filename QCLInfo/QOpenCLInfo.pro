@@ -40,5 +40,6 @@ linux:!android {
 } win32 {
     message ("* Using settings for Windows")
     INCLUDEPATH += "$$PWD/CL/include"
+# mingw builds only - it's get everything from *.dll. MS/Intel compilers required corresponding OpenCL.lib file
     LIBS +=C:/Windows/System32/OpenCL.dll
 }
