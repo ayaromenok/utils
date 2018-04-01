@@ -3,7 +3,7 @@ some useful utils can be found here
 
 ## Table of Contest
 1. [OpenCL info](#QCLInfo)
-2. [Sensors info] (#QtQmlSensors)
+2. [Sensors info](#QtQmlSensors)
 
 ## QCLInfo<a name="QCLInfo"> </a>
 qmake project and QOpenCL information class.
