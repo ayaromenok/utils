@@ -22,6 +22,7 @@ public:
     ~QCLInfo();
     QStringList getPlatformNames();
     QStringList getDeviceNames();
+    QStringList getDeviceByTypes();
     Q_INVOKABLE cl_platform_id getPlatform();
     Q_INVOKABLE cl_device_id   getDeviceId();
 signals:
@@ -40,6 +41,7 @@ private:
     QVector<cl_device_id>       _devices;
     QStringList                 _platformNames;
     QStringList                 _deviceNames;
+    QStringList                 _deviceTypes;
 };
 
 #endif // QCLINFO_H

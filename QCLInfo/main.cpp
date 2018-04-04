@@ -15,6 +15,7 @@ int main(int argc, char *argv[])
     QCLInfo* clInfo = new QCLInfo;
     qDebug() << "OpenCL platforms:" << clInfo->getPlatformNames();
     qDebug() << "OpenCL devices:" << clInfo->getDeviceNames();
+    qDebug() << "get devices by type" << clInfo->getDeviceByTypes();
     delete clInfo;
 
     return a.exec();

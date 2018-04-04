@@ -152,6 +152,34 @@ QCLInfo::getDevices(){
     }
 }
 
+QStringList
+QCLInfo::getDeviceByTypes()
+{
+    const int NUM_OF_DEVICE_TYPE = 3;
+    cl_device_type deviceType[NUM_OF_DEVICE_TYPE] = {CL_DEVICE_TYPE_GPU,
+                                                    CL_DEVICE_TYPE_CPU,
+                                                    CL_DEVICE_TYPE_ACCELERATOR};
+    cl_uint deviceCount[NUM_OF_DEVICE_TYPE] = {0,0,0};
+    _deviceTypes.clear();
+    _deviceTypes<< "GPU: "<<"CPU: "<<"Accelerator: ";
+
+            ;
+    if (_deviceNum >0){
+        for (int i=0; i<_deviceNum; i++){
+            _status = clGetDeviceIDs(_platforms.at(0),
+                                     deviceType[i],
+                                     0,
+                                     0,
+                                     &deviceCount[i]);
+            if(CL_DEVICE_NOT_FOUND ==_status){
+                deviceCount[i] = 0;
+            }
+            _deviceTypes.replace(i, _deviceTypes.at(i)+QString::number(deviceCount[i]));
+        }
+        return _deviceTypes;
+    }
+}
+
 cl_platform_id
 QCLInfo::getPlatform()
 {
