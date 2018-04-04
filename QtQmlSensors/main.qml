@@ -34,6 +34,10 @@ Window {
         id: compass
         active:true
     }
+    Gyroscope{
+        id: gyro
+        active: true
+    }
     // UI
     ColumnLayout{
         anchors.fill: parent
@@ -139,33 +143,33 @@ Window {
             }
         }
 
-        Rectangle{
-            implicitWidth: parent.width
-            implicitHeight: 90
-            GroupBox {
-                id: gbAltimeter
-                anchors.fill: parent
-                font.bold: true
-                font.pointSize: 13
-                title: "Altimeter"
+//        Rectangle{
+//            implicitWidth: parent.width
+//            implicitHeight: 90
+//            GroupBox {
+//                id: gbAltimeter
+//                anchors.fill: parent
+//                font.bold: true
+//                font.pointSize: 13
+//                title: "Altimeter"
 
-                RowLayout {
-                    anchors.fill: parent
-                    Button {
-                        id: altimeterStart
-                        text: altimeter.active ? "Stop" : "Start"
-                        onClicked: {
-                            altimeter.active = (altimeterStart.text === "Start");
-                        }
-                    }
-                    Text {
-                        id: altimeterText
-                        verticalAlignment: Text.AlignVCenter
-                        text: "Altitude: " + (altimeter.reading ? altimeter.reading.altitude.toFixed(2) + "meters" : "--")
-                    }
-                }
-            }
-        }
+//                RowLayout {
+//                    anchors.fill: parent
+//                    Button {
+//                        id: altimeterStart
+//                        text: altimeter.active ? "Stop" : "Start"
+//                        onClicked: {
+//                            altimeter.active = (altimeterStart.text === "Start");
+//                        }
+//                    }
+//                    Text {
+//                        id: altimeterText
+//                        verticalAlignment: Text.AlignVCenter
+//                        text: "Altitude: " + (altimeter.reading ? altimeter.reading.altitude.toFixed(2) + "meters" : "--")
+//                    }
+//                }
+//            }
+//        }
         Rectangle{
             implicitWidth: parent.width
             implicitHeight: 90
@@ -199,6 +203,44 @@ Window {
                         id: accelZtext
                         verticalAlignment: Text.AlignVCenter
                         text: "Z: " + (accel.reading ? accel.reading.z.toFixed(2) + " m/s^2" : "--")
+                    }
+                }
+            }
+        }
+
+        Rectangle{
+            implicitWidth: parent.width
+            implicitHeight: 90
+            GroupBox {
+                id: gbGyro
+                anchors.fill: parent
+                font.bold: true
+                font.pointSize: 13
+                title: "Gyroscope"
+
+                RowLayout {
+                    anchors.fill: parent
+                    Button {
+                        id: gyroStart
+                        text: gyro.active ? "Stop" : "Start"
+                        onClicked: {
+                            gyro.active = (gyroStart.text === "Start");
+                        }
+                    }
+                    Text {
+                        id: gyroXtext
+                        verticalAlignment: Text.AlignVCenter
+                        text: "X: " + (gyro.reading ? gyro.reading.x.toFixed(2) + " m/s^2" : "--")
+                    }
+                    Text {
+                        id: gyroYtext
+                        verticalAlignment: Text.AlignVCenter
+                        text: "Y: " + (gyro.reading ? gyro.reading.y.toFixed(2) + " m/s^2" : "--")
+                    }
+                    Text {
+                        id: gyroZtext
+                        verticalAlignment: Text.AlignVCenter
+                        text: "Z: " + (gyro.reading ? gyro.reading.z.toFixed(2) + " m/s^2" : "--")
                     }
                 }
             }
