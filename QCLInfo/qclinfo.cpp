@@ -151,3 +151,19 @@ QCLInfo::getDevices(){
         }
     }
 }
+
+cl_platform_id
+QCLInfo::getPlatform()
+{
+    if (_platformNum > 0)
+        return _platforms.at(0);
+    return 0;
+}
+
+cl_device_id
+QCLInfo::getDeviceId()
+{
+    if (_deviceNum > 0)
+        return _devices.at(0);
+    return 0;
+}

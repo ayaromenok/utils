@@ -22,7 +22,8 @@ public:
     ~QCLInfo();
     QStringList getPlatformNames();
     QStringList getDeviceNames();
-
+    Q_INVOKABLE cl_platform_id getPlatform();
+    Q_INVOKABLE cl_device_id   getDeviceId();
 signals:
 
 public slots:
