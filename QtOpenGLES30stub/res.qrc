@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/64x64.png</file>
+        <file>res/main.fsh</file>
+        <file>res/main.vsh</file>
+    </qresource>
+</RCC>
