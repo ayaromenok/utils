@@ -9,11 +9,20 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLExtraFunctions>
 
+#ifndef GL_READ_WRITE
+#define GL_READ_WRITE 0x88BA
+#endif
+
+#ifndef GL_SHADER_IMAGE_ACCESS_BARRIER_BIT
+#define GL_SHADER_IMAGE_ACCESS_BARRIER_BIT 0x00000020
+#endif
+
 MainWindow::MainWindow()
     : _prg(0),
       _vbo(0),
       _vao(0),
       _tex(0),
+      _texOut(0),
       _vecEye(0,0,0),
       _vecTarget(0,0,-10)
 {
@@ -70,7 +79,7 @@ QByteArray versionedShaderCode(const char *fileName)
     if (QOpenGLContext::currentContext()->isOpenGLES())
         versionedSrc.append(QByteArrayLiteral("#version 310 es\n"));
     else
-        versionedSrc.append(QByteArrayLiteral("#version 420\n"));
+        versionedSrc.append(QByteArrayLiteral("#version 430\n"));
 
     versionedSrc.append(file.readAll());
     file.close();
@@ -86,19 +95,28 @@ MainWindow::initializeGL()
 
     if (_prg) { delete _prg; }
     if (_tex) { delete _tex; }
+    if (_tex) { delete _texOut; }
 
     QImage img(":/res/64x64.png");
     Q_ASSERT(!img.isNull());
     _tex = new QOpenGLTexture(img);
+
+    _texOut = new QOpenGLTexture(QOpenGLTexture::Target2D);
+    _texOut->setFormat(_tex->format());
+    _texOut->setSize(_tex->width(), _tex->height());
+    _texOut->allocateStorage(QOpenGLTexture::BGR, QOpenGLTexture::UInt8);
 
     _prg = new QOpenGLShaderProgram;
     _prg->addShaderFromSourceCode(QOpenGLShader::Vertex,
                                   versionedShaderCode(":/res/main.vsh"));
     _prg->addShaderFromSourceCode(QOpenGLShader::Fragment,
                                   versionedShaderCode(":/res/main.fsh"));
-//    _prg->addShaderFromSourceCode(QOpenGLShader::Geometry,
-//                                  versionedShaderCode(":/res/main.gsh"));
     _prg->link();
+
+    _prgCompute = new QOpenGLShaderProgram;
+    _prg->addShaderFromSourceCode(QOpenGLShader::Geometry,
+                                      versionedShaderCode(":/res/main.gsh"));
+    _prgCompute->link();
 
     _posMtxProj = _prg->uniformLocation("mtxProj");
     _posMtxWorld = _prg->uniformLocation("mtxWorld");
@@ -123,8 +141,10 @@ MainWindow::initializeGL()
     f->glEnableVertexAttribArray(1);
     f->glEnableVertexAttribArray(2);
     f->glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
-    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), reinterpret_cast<void *>(3 * sizeof(GLfloat)));
-    f->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), reinterpret_cast<void *>(6 * sizeof(GLfloat)));
+    f->glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat),
+                             reinterpret_cast<void *>(3 * sizeof(GLfloat)));
+    f->glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat),
+                             reinterpret_cast<void *>(6 * sizeof(GLfloat)));
     _vbo->release();
 
     f->glEnable(GL_DEPTH_TEST);
@@ -154,11 +174,22 @@ MainWindow::paintGL()
 
     QOpenGLExtraFunctions *f = QOpenGLContext::currentContext()->extraFunctions();
 
+    f->glBindImageTexture(0, _tex->textureId(), 0, 0, 0, GL_READ_WRITE, GL_RGB);
+    f->glBindImageTexture(1, _texOut->textureId(), 0, 0, 0, GL_READ_WRITE, GL_RGB);
+    _prgCompute->bind();
+    f->glDispatchCompute(8,8,1); //X, Y need to be updated, specially for ARM Mali
+    f->glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT);
+    _prgCompute->release();
+
+    f->glBindImageTexture(0, 0, 0, 0, 0,  GL_READ_WRITE, GL_RGB);
+    f->glBindImageTexture(1, 0, 0, 0, 0,  GL_READ_WRITE, GL_RGB);
+
+
     f->glClearColor(0, 0.5, 0, 1);
     f->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     _prg->bind();
-    _tex->bind();
+    _tex->bind(0);
     _vecEye = QVector3D(0,0,10);                // eye position can be changed here
     _vecTarget = QVector3D(0,0,-10);            // center of view is here
     _mtxCam.lookAt(_vecEye, _vecTarget, QVector3D(0,1,0));
@@ -169,8 +200,15 @@ MainWindow::paintGL()
     _prg->setUniformValue(_posMtxMy, _mtxMy);
 
     f->glDrawArrays(GL_TRIANGLE_FAN,0, cnMeshSize);
+    _prg->release();
+    _tex->release(0);
 
+
+    _texOut->bind(0);
+    _prg->bind();
     _mtxMy.translate(QVector3D(20,0,0));          //result
     _prg->setUniformValue(_posMtxMy, _mtxMy);
     f->glDrawArrays(GL_TRIANGLE_FAN,0, cnMeshSize);
+    _prg->release();
+    _texOut->release(0);
 }

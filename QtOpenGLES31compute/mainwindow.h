@@ -29,6 +29,8 @@ private:
     QOpenGLBuffer*              _vbo;
     QOpenGLVertexArrayObject*   _vao;
     QOpenGLTexture*             _tex;
+    QOpenGLShaderProgram*       _prgCompute;
+    QOpenGLTexture*             _texOut;
 
     int                         _posMtxProj;
     int                         _posMtxCam;

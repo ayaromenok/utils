@@ -1,4 +1,4 @@
-#define IMGFORMAT rgba8
+#define IMGFORMAT rgb8
 layout(binding = 0, IMGFORMAT) uniform readonly highp image2D inputImage;
 layout(binding = 1, IMGFORMAT) uniform readonly highp image2D outputImage;
 
