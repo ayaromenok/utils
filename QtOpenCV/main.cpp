@@ -1,36 +1,15 @@
-#include <iostream>
-#include <opencv/cv.hpp>
+#include <QApplication>
+#include <QDebug>
+//#include "mainwindow.h"
 
-using namespace std;
-
-int main(int argc, char ** argv)
+int main(int argc, char *argv[])
 {
-    cout << "Qt/OpenCV" << endl;
-    cv::VideoCapture cap;
+    QApplication a(argc, argv);
+    qDebug() << "++++++++++++++++++++++++++++++++++++++++++";
+    qDebug() << "|\tQt OpenCV stub app  \t|";
+    qDebug() << "------------------------------------------";
+//    MainWidget w;
+//    w.show();
 
-    if(argc==1){
-        cap.open(0);
-    } else
-    {
-        cap.open(argv[1]);
-        cout << "add video as command-line argument\n";
-    }
-    if (!cap.isOpened()){
-        cerr << "Couldn't open capture" << endl;
-        return -1;
-    }
-    cv::namedWindow("VideoFromCamera", cv::WINDOW_AUTOSIZE);
-    cv::Mat frame;
-
-    for(;;) {
-        cap >> frame;
-        if (frame.empty())
-            break;
-        cv::imshow("VideoFromCamera", frame);
-        if (cv::waitKey(33) >= 0) //ESC key
-            break;
-    }
-
-    cv::destroyWindow("VideoFromCamera");
-    return 0;
+    return a.exec();
 }
