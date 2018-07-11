@@ -1,6 +1,12 @@
-
+#CV3ANDROID should be defined on root *.pro file
 linux:!android {
     message("* Using settings for Unix/Linux.")
+    contains(QMAKE_HOST.arch, x86_64){
+        message("        arch: amd64")
+    }
+    contains(QMAKE_HOST.arch, x86){
+        message("        arch: i386")
+    }
     LIBS += -lopencv_core -lopencv_imgcodecs -lopencv_videoio \
             -lopencv_imgproc -lopencv_highgui
 }

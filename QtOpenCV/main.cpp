@@ -1,6 +1,6 @@
 #include <QApplication>
 #include <QDebug>
-//#include "mainwindow.h"
+#include "cvwidget.h"
 
 int main(int argc, char *argv[])
 {
@@ -8,8 +8,8 @@ int main(int argc, char *argv[])
     qDebug() << "++++++++++++++++++++++++++++++++++++++++++";
     qDebug() << "|\tQt OpenCV stub app  \t|";
     qDebug() << "------------------------------------------";
-//    MainWidget w;
-//    w.show();
+    CvWidget w;
+    w.show();
 
     return a.exec();
 }
