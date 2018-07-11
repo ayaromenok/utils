@@ -48,13 +48,17 @@ CvWidget::_setMinUI()
 {
     qDebug() << QDateTime::currentMSecsSinceEpoch() << "CvWidget::_setMinUI()";
     this->setWindowTitle("Qt\OpenCV camera");
-    this->setGeometry(0, 0, 360, 640);
+    this->setGeometry(0, 0, 360, 720);
+
+    QImage cvLogo = QImage(":/res/opencvlogo320x240.png");
 
     _vLOut = new QVBoxLayout();
     _hLOut = new QHBoxLayout();
     _lblInfo = new QLabel("info");
     _lblImgIn = new QLabel("image from Camera");
+    _lblImgIn->setPixmap(QPixmap::fromImage(cvLogo));
     _lblImgOut = new QLabel("image from OpenCV");
+    _lblImgOut->setPixmap(QPixmap::fromImage(cvLogo));
     _btnCapture = new QPushButton("capture");
     _camViewFinder = new QCameraViewfinder();
     _hLOut->addWidget(_btnCapture);
