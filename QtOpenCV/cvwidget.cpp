@@ -99,11 +99,12 @@ CvWidget::_imgToBuffer(int id, const QVideoFrame &buffer)
     QImage imgIn = QImage::fromData(frame.bits(), nbytes).scaledToWidth(360);
     qDebug() << "imgIn format" << imgIn.format() << "// 4 - Image::Format_RGB32";
     _lblImgIn->setPixmap(QPixmap::fromImage(imgIn));
-    _cvStub(imgIn);
+    _cvStubRgb2GrayEdge(imgIn);
+    //_cvStubRgbBlur(imgIn);
 }
 
 void
-CvWidget::_cvStub(QImage & image)
+CvWidget::_cvStubRgb2GrayEdge(QImage & image)
 {
     qint64 startTime, endTime, difTime;
     startTime = QDateTime::currentMSecsSinceEpoch();
@@ -130,11 +131,48 @@ CvWidget::_cvStub(QImage & image)
     QImage imgOut(image.width(), image.height(), QImage::Format_RGB888);
     cv::Mat cvOut(cv::Size(imgOut.width(),imgOut.height()),
                   CV_8UC3, imgOut.bits());
-    cv::cvtColor(cvTmpCanny, cvOut, cv::COLOR_GRAY2BGR);
+    cv::cvtColor(cvTmpCanny, cvOut, cv::COLOR_GRAY2RGB);
 
     endTime = QDateTime::currentMSecsSinceEpoch();
     difTime = endTime-startTime;
-    qDebug() << startTime << "CvWidget::_cvStub(" << image.size() << ")";
+    qDebug() << startTime << "CvWidget::_cvStubRgb2GrayEdge(" << image.size() << ")";
+    qDebug() << endTime << "duration:" << difTime << "msec";
+    _lblImgOut->setPixmap(QPixmap::fromImage(imgOut));
+}
+
+void
+CvWidget::_cvStubRgbBlur(QImage & image)
+{
+    qint64 startTime, endTime, difTime;
+    startTime = QDateTime::currentMSecsSinceEpoch();
+
+    cv::Mat cvIn(cv::Size(image.width(), image.height()),
+                          CV_8UC4, image.bits()); //image from camera 32bit alligned
+    cv::Mat cvTmp;
+    cv::cvtColor(cvIn, cvTmp, cv::COLOR_RGBA2RGB);
+
+    cv::Mat cvTmpBlur;
+    cv::GaussianBlur(cvTmp, cvTmpBlur, cv::Size(5,5), 3, 3);
+
+#ifdef DEBUG_PC_IMSHOW
+    // while OpenCV build with Qt on PC, it's possible to mix native Qt window
+    // with separate cv::NamedWindow for displaying immidiate result
+    // but it's crashed on Android/other due to single-window architecture
+    cv::namedWindow("cvTmp", cv::WINDOW_AUTOSIZE);
+    cv::imshow("cvTmp", cvTmp);
+
+    cv::namedWindow("cvTmpBlur", cv::WINDOW_AUTOSIZE);
+    cv::imshow("cvTmpBlur", cvTmpBlur);
+#endif //DEBUG_PC_IMSHOW
+
+    QImage imgOut(image.width(), image.height(), QImage::Format_RGB888);
+    cv::Mat cvOut(cv::Size(imgOut.width(),imgOut.height()),
+                  CV_8UC3, imgOut.bits());
+    cv::cvtColor(cvTmpBlur, cvOut, cv::COLOR_BGR2RGB);
+
+    endTime = QDateTime::currentMSecsSinceEpoch();
+    difTime = endTime-startTime;
+    qDebug() << startTime << "CvWidget::_cvStubRgbBlur(" << image.size() << ")";
     qDebug() << endTime << "duration:" << difTime << "msec";
     _lblImgOut->setPixmap(QPixmap::fromImage(imgOut));
 }

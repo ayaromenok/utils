@@ -30,7 +30,8 @@ private slots:
 private:
     void    _setCam();
     void    _setMinUI();
-    void    _cvStub(QImage & image);
+    void    _cvStubRgb2GrayEdge(QImage & image);
+    void    _cvStubRgbBlur(QImage & image);
 
     QCamera*                        _cam;
     QCameraImageCapture*            _imgCap;
