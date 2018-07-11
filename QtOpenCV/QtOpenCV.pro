@@ -6,6 +6,9 @@ CONFIG += c++11
 
 #change path to OpenCV SDK here. this one used *.so, but can be changed to *.a
 CV3ANDROID = /home/az/sdk/android/opencv/3/sdk/native
+linux:!android {
+    #DEFINES += DEBUG_PC_IMSHOW
+}
 include(opencv.pri)  #OpenCV stuff here
 include(android.pri) #Android standard stuff here
 SOURCES += \
