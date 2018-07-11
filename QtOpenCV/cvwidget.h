@@ -2,6 +2,7 @@
 #define CVWIDGET_H
 
 #include <QWidget>
+#include <QVideoFrame>
 
 class QCamera;
 class QCameraImageCapture;
@@ -21,9 +22,13 @@ signals:
 
 public slots:
 
+private slots:
+    void    _imgCapture();
+    void    _imgToBuffer(int id, const QVideoFrame &buffer);
+
 private:
-    void                            _setCam();
-    void                            _setMinUI();
+    void    _setCam();
+    void    _setMinUI();
 
     QCamera*                        _cam;
     QCameraImageCapture*            _imgCap;

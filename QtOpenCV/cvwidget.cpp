@@ -37,6 +37,10 @@ CvWidget::_setCam()
 
     _imgCap = new QCameraImageCapture(_cam);
     _imgCap->setCaptureDestination(QCameraImageCapture::CaptureToBuffer);
+   connect(_imgCap, &QCameraImageCapture::imageAvailable,
+           this, &CvWidget::_imgToBuffer);
+   connect(_btnCapture, SIGNAL(pressed()),
+                               this, SLOT (_imgCapture()));
 
     _camViewFinder->show();
     _cam->setViewfinder(_camViewFinder);
@@ -69,4 +73,28 @@ CvWidget::_setMinUI()
     _vLOut->addWidget(_lblImgOut);
 
     this->setLayout(_vLOut);
+}
+
+void
+CvWidget::_imgCapture()
+{
+    qDebug() << QDateTime::currentMSecsSinceEpoch() << "CvWidget::_imgCapture()";
+    _cam->searchAndLock();
+    _imgCap->capture();
+    _cam->unlock();
+}
+
+void
+CvWidget::_imgToBuffer(int id, const QVideoFrame &buffer)
+{
+    qDebug() << QDateTime::currentMSecsSinceEpoch() << "CvWidget::_imgToBuffer("
+             << id << "," << buffer.size() << ")";
+    _lblInfo->setText("Image #"+QString::number(id)+" captured");   QVideoFrame frame(buffer);  // make a copy we can call map (non-const) on
+    frame.map(QAbstractVideoBuffer::ReadOnly);
+    QImage::Format imageFormat = QVideoFrame::imageFormatFromPixelFormat(
+                frame.pixelFormat());
+    int nbytes = frame.mappedBytes();
+    QImage imgIn = QImage::fromData(frame.bits(), nbytes).scaledToWidth(360);
+    qDebug() << "imgIn format" << imgIn.format() << "// 4 - Image::Format_RGB32";
+    _lblImgIn->setPixmap(QPixmap::fromImage(imgIn));
 }
