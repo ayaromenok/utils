@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QVideoFrame>
+#include <QImage>
 
 class QCamera;
 class QCameraImageCapture;
@@ -29,6 +30,7 @@ private slots:
 private:
     void    _setCam();
     void    _setMinUI();
+    void    _cvStub(QImage & image);
 
     QCamera*                        _cam;
     QCameraImageCapture*            _imgCap;

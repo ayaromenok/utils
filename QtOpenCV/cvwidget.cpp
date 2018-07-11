@@ -10,6 +10,8 @@
 #include <QLabel>
 #include <QPushButton>
 
+#include <opencv/cv.hpp>
+
 CvWidget::CvWidget(QWidget *parent) : QWidget(parent)
 {
     qDebug() << QDateTime::currentMSecsSinceEpoch() << "CvWidget::CvWidget()";
@@ -97,4 +99,42 @@ CvWidget::_imgToBuffer(int id, const QVideoFrame &buffer)
     QImage imgIn = QImage::fromData(frame.bits(), nbytes).scaledToWidth(360);
     qDebug() << "imgIn format" << imgIn.format() << "// 4 - Image::Format_RGB32";
     _lblImgIn->setPixmap(QPixmap::fromImage(imgIn));
+    _cvStub(imgIn);
+}
+
+void
+CvWidget::_cvStub(QImage & image)
+{
+    qint64 startTime, endTime, difTime;
+    startTime = QDateTime::currentMSecsSinceEpoch();
+
+    cv::Mat cvIn(cv::Size(image.width(), image.height()),
+                          CV_8UC4, image.bits()); //image from camera 32bit alligned
+    cv::Mat cvTmpGray;
+    cv::cvtColor(cvIn, cvTmpGray, cv::COLOR_RGBA2GRAY);
+
+    cv::Mat cvTmpCanny;
+    cv::Canny(cvTmpGray, cvTmpCanny, 10, 100, 3, true);
+
+#ifdef DEBUG_PC_IMSHOW
+    // while OpenCV build with Qt on PC, it's possible to mix native Qt window
+    // with separate cv::NamedWindow for displaying immidiate result
+    // but it's crashed on Android/other due to single-window architecture
+    cv::namedWindow("cvTmpGray", cv::WINDOW_AUTOSIZE);
+    cv::imshow("cvTmpGray", cvTmpGray);
+
+    cv::namedWindow("cvTmpCanny", cv::WINDOW_AUTOSIZE);
+    cv::imshow("cvTmpCanny", cvTmpCanny);
+#endif //DEBUG_PC_IMSHOW
+
+    QImage imgOut(image.width(), image.height(), QImage::Format_RGB888);
+    cv::Mat cvOut(cv::Size(imgOut.width(),imgOut.height()),
+                  CV_8UC3, imgOut.bits());
+    cv::cvtColor(cvTmpCanny, cvOut, cv::COLOR_GRAY2BGR);
+
+    endTime = QDateTime::currentMSecsSinceEpoch();
+    difTime = endTime-startTime;
+    qDebug() << startTime << "CvWidget::_cvStub(" << image.size() << ")";
+    qDebug() << endTime << "duration:" << difTime << "msec";
+    _lblImgOut->setPixmap(QPixmap::fromImage(imgOut));
 }
