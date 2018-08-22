@@ -23,3 +23,18 @@ android {
            $${CV3ANDROID}/libs/armeabi-v7a/libopencv_java3.so
     }
 }
+
+macx{
+    message("* Using settings for Mac OS X.")
+    contains(QMAKE_HOST.arch, x86_64){
+        message("        arch: amd64")
+    }
+    contains(QMAKE_HOST.arch, x86){
+        message("        arch: i386")
+    }
+    INCLUDEPATH += /usr/local/include
+    LIBS += -L/usr/local/lib
+    LIBS += -lopencv_core -lopencv_imgcodecs -lopencv_videoio \
+            -lopencv_imgproc -lopencv_highgui
+
+}
