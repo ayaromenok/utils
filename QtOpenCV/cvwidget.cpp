@@ -82,7 +82,9 @@ CvWidget::_imgCapture()
 {
     qDebug() << QDateTime::currentMSecsSinceEpoch() << "CvWidget::_imgCapture()";
     _cam->searchAndLock();
-    _imgCap->capture();
+        //qDebug() << "can't searchAndLook";
+    if (_imgCap->capture())
+        qDebug() << "capture is ok";
     _cam->unlock();
 }
 
