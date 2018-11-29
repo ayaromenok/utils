@@ -45,6 +45,8 @@ int main(int argc, char *argv[])
                 QString sLineOut("echo \"");
                 sLine = sLine.left(sLine.length()-1);
                 //qDebug() << sLine;
+                sLineOut.append(sTestName);
+                sLineOut.append(": ");
                 sLineOut.append(sLine);
                 sLineOut.append("\"\ntime -p ./");
                 sLineOut.append(sTestName);
