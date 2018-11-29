@@ -23,13 +23,11 @@ int main(int argc, char *argv[])
             }
             sFileOut.append(sFileIn.left(sFileIn.length()-3));
             sFileOut.append("sh");
-            qDebug() << "output to" << sFileOut;
+
             QTextStream in(&fIn);
             QString sTestName("opencv_");
             sTestName.append(sFileIn.left(sFileIn.length()-4));
             qDebug() << "test name" << sTestName;
-            sFileOut.append("sTestName");
-            sFileOut.append(".sh");
             fOut.setFileName(sFileOut);
             if (!fOut.open((QIODevice::WriteOnly|QIODevice::Text))){
                 qDebug() << "can't open" << sFileOut << "to write";
@@ -38,25 +36,25 @@ int main(int argc, char *argv[])
                 qDebug() << "write to" << sFileOut;
             }
             QTextStream out(&fOut);
+            out << "#!/bin/sh\n";
+            out << "mkdir res\n" ;
+            out << "echo \"\n\nrunning:\t\t" << sTestName << "\n\n\"\n";
             while (!in.atEnd()) {
                 QString sLine = in.readLine();
                 QString sLineOut("echo \"");
-//                echo "OCL_DilateFixture_Dilate"
-//                time ./opencv_perf_imgproc --gtest_filter=*OCL_DilateFixture_Dilate* > perf_imgproc_OCL_DilateFixture_Dilate.txt
-                //process_line(line); //remove point from end of string
                 sLine = sLine.left(sLine.length()-1);
-                qDebug() << sLine;
+                //qDebug() << sLine;
                 sLineOut.append(sLine);
-                sLineOut.append("\"\ntime ./");
+                sLineOut.append("\"\ntime -p ./");
                 sLineOut.append(sTestName);
                 sLineOut.append(" --gtest_filter=*");
                 sLineOut.append(sLine);
-                sLineOut.append("* > ");
+                sLineOut.append("* > res/");
                 sLineOut.append(sTestName);
                 sLineOut.append("_");
-                sLineOut.append(sLine);
+                sLineOut.append(sLine.replace("/","_"));
                 sLineOut.append(".txt\n");
-                qDebug() << sLineOut;
+                //qDebug() << sLineOut;
                 out << sLineOut ;
             }
             fIn.close();
@@ -69,7 +67,10 @@ int main(int argc, char *argv[])
     }
     else {
         qDebug() << "file with test names required";
+        qDebug() << "to obtain it use something like:";
+        qDebug() << "./opencv_perf_stitching --gtest_list_tests --gtest_filter=*OCL* | grep OCL_ > perf_stitching.txt";
+
     }
 
-    return a.exec();
+    return 0;
 }
