@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
             out << "echo \"\n\nrunning:\t\t" << sTestName << "\n\n\"\n";
             while (!in.atEnd()) {
                 QString sLine = in.readLine();
+                //some tests have DISABLED in name - disable it here too?
                 QString sLineOut("echo \"");
                 sLine = sLine.left(sLine.length()-1);
                 //qDebug() << sLine;
@@ -52,7 +53,8 @@ int main(int argc, char *argv[])
                 sLineOut.append("* > res/");
                 sLineOut.append(sTestName);
                 sLineOut.append("_");
-                sLineOut.append(sLine.replace("/","_"));
+                //some test names include '/' and space
+                sLineOut.append(sLine.replace("/","_").remove(" "));
                 sLineOut.append(".txt\n");
                 //qDebug() << sLineOut;
                 out << sLineOut ;
