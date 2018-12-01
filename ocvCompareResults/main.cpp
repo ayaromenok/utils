@@ -3,9 +3,75 @@
 #include <QFileInfo>
 #include <QDir>
 
+int parseFile(QString &sFileName){
+    QFileInfo fi(sFileName);
+    QFile fileIn;
+    if (fi.exists()){
+        qDebug() << "file" << sFileName << ", size" << fi.size();
+        fileIn.setFileName(sFileName);
+        if (!fileIn.open(QIODevice::ReadOnly | QIODevice::Text)){
+            qWarning() << "can't open" << sFileName << "to read";
+            return -1;
+        }
+        QTextStream streamIn(&fileIn);
+        int countClOutOfRes = 0;
+        while (!streamIn.atEnd()) {
+            QString sLine = streamIn.readLine();
+
+            if (sLine.contains("[ RUN      ]")){
+
+                //qDebug() << "line" << sLine;
+                qDebug() << "test name" << sLine.right(sLine.length() -13);
+                if (!streamIn.atEnd()){
+                    QString sLineN = streamIn.readLine();
+                    if (sLineN.contains("[       OK ]")){
+                        QString res = sLineN.left(sLineN.indexOf(" ms"));
+                        res = res.right(res.length()-res.indexOf("(")-1);
+                        qDebug() << "OK" << res.toInt() << "msec";
+
+                    } else if (sLineN.contains("[ PERFSTAT ]")){
+                        qDebug() << "PERF" << sLineN;
+                    } else if (sLineN.contains("CL_OUT_OF_RES")){
+                        qDebug() << "CL out_of_res" << sLineN;
+                        countClOutOfRes++;
+                    }
+                }
+            } else if (sLine.contains("CL_OUT_OF_RES")){
+                //qDebug() << "CL out_of_res" << sLine;
+                countClOutOfRes++;
+            }else if (sLine.contains("[       OK ]")){
+                if (countClOutOfRes>0){
+                    qDebug() << "Total # of CL errors:" << countClOutOfRes;
+                    countClOutOfRes = 0;
+                }
+                qDebug() << "NOK, see CL errors above";// << sLine;
+            }
+        }
+
+    } else {
+        qWarning() << "file" << sFileName << "not found";
+    }
+    return 0;
+}
+
 int parseFileList(QVector<QStringList> &fileList){
     for (int i=0; i<fileList.length(); i++){
         qDebug() <<fileList.at(i);
+        QStringList list = fileList.at(i);
+        if (list.length()>2) {
+            for (int j=2; j<list.length();j++){
+                QString sFileName(list.at(0));
+                sFileName.append('/');
+                sFileName.append(list.at(1));
+                sFileName.append('/');
+                sFileName.append(list.at(j));
+                parseFile(sFileName);
+            }
+        } else
+        {
+            qWarning() << "File list is not correct, exiting";
+            return -1;
+        }
     }
     return 0;
 }
@@ -21,8 +87,8 @@ int main(int argc, char *argv[])
     qDebug() << "run at" << QDir::current();
     if (argc > 1)
     {
-         qDebug() << "arch dir:" << argv[1];
-         dirArch.append(argv[1]);
+        qDebug() << "arch dir:" << argv[1];
+        dirArch.append(argv[1]);
     } else {
         qDebug() << "no arch dir selected, use default: Rk3399";
         dirArch.append("Rk3399");
@@ -35,8 +101,9 @@ int main(int argc, char *argv[])
     for (int i=2; i< dirList.length(); i++){
         dir.cd(dirList.at(i));
         QStringList list = dir.entryList(QDir::Files);
-        //store dir name as first element;
+        //store arch as first element and testdir as second;
         list.insert(0,dirList.at(i));
+        list.insert(0,dirArch);
         testFileList.append(list);
         dir.cdUp();
     }
