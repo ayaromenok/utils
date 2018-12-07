@@ -16,8 +16,10 @@ public slots:
 
 private:
     void            addConfDirs();
+    void            addFileList();
     QString*        _sArchDir;
     QStringList*    _slConfDirs;
+    QVector<QStringList>* _vslFileList;
 };
 
 #endif // YAPARSEFILES_H

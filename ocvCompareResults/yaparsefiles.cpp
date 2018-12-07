@@ -25,6 +25,7 @@ YaParseFiles::addArchDir(QString &sArchDir)
         qWarning() << "use default arch dir value:" << _sArchDir->toLatin1();
     }
     addConfDirs();
+    addFileList();
 }
 
 void
@@ -37,6 +38,23 @@ YaParseFiles::addConfDirs()
         return;
     }
     _slConfDirs->append(dir.entryList(QDir::Dirs|QDir::NoDot|QDir::NoDotDot));
-    qDebug() << "dirs" << _slConfDirs->toVector();
+    qDebug() << "dirs:" << _slConfDirs->length() << _slConfDirs->toVector();
+}
 
+void
+YaParseFiles::addFileList()
+{
+    QDir dir;
+    _vslFileList = new QVector<QStringList>;
+    dir.cd(_sArchDir->toLatin1());
+    for (int i=0; i<_slConfDirs->length(); i++){
+        if (dir.cd(_slConfDirs->at(i))){
+            _vslFileList->append(dir.entryList(QDir::Files));
+            dir.cdUp();
+        }
+        else {
+            qWarning() << "can't cd to" << _slConfDirs->at(i);
+        }
+    }
+    qDebug() << "files" << _vslFileList->toList();
 }
