@@ -87,8 +87,9 @@ YaParseFiles::parseFile(const QString &sFileName)
 {
     QFileInfo fi(sFileName);
     QFile fileIn;
+    bool isManyCLErrorsInFile = false;
     if (fi.exists()){
-        qDebug() << "file" << sFileName << ", size" << fi.size();
+        //qDebug() << "file" << sFileName << ", size" << fi.size();
         fileIn.setFileName(sFileName);
         if (!fileIn.open(QIODevice::ReadOnly | QIODevice::Text)){
             qWarning() << "can't open" << sFileName << "to read";
@@ -130,9 +131,18 @@ YaParseFiles::parseFile(const QString &sFileName)
                 countClOutOfRes++;
             } else if (sLine.contains("[       OK ]")){
                 if (countClOutOfRes>0){
-                    qDebug() << "Test name:" << sTestName;
-                    qDebug() << slTestCLError;
-                    qDebug() << "Total # of CL errors:" << countClOutOfRes;
+                    if (!isManyCLErrorsInFile){
+                        qDebug() << "      " << sFileName.right(sFileName.length()
+                                                 -sFileName.lastIndexOf("/")-1);
+                    }
+                    isManyCLErrorsInFile = true;
+                    qDebug() << "test: " << sTestName;
+                    for (int i=0; i< slTestCLError.length(); i++) {
+                        qDebug() << "error:" << slTestCLError.at(i).right(
+                                        slTestCLError.at(i).length() - 2
+                                        - slTestCLError.at(i).lastIndexOf(":"));
+                    }
+                    qDebug() << "num:   " << countClOutOfRes;
                     sTestName.clear();
                     slTestCLError.clear();
                     countClOutOfRes = 0;
