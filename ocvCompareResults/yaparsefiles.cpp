@@ -5,12 +5,19 @@
 
 YaParseFiles::YaParseFiles(QObject *parent) : QObject(parent)
 {
-
+    _slUniqueClErrors = new QStringList;
+    _slUniqueCvMethods = new QStringList;
 }
 
 YaParseFiles::~YaParseFiles()
 {
-
+    dumpMethodsErrorsToFile();
+    qDebug() << "methods:" << _slUniqueCvMethods->length();
+    qDebug() << "errors:" << _slUniqueClErrors->length();
+    _slUniqueClErrors->clear();
+    delete _slUniqueClErrors;
+    _slUniqueCvMethods->clear();
+    delete _slUniqueCvMethods;
 }
 
 void
@@ -97,7 +104,8 @@ YaParseFiles::parseFile(const QString &sFileName)
         }
         QTextStream streamIn(&fileIn);
         int countClOutOfRes = 0;
-        QString sTestName;
+        QString sCvTestName;
+        QString sClErrorName;
         QStringList slTestCLError;
         while (!streamIn.atEnd()) {
             QString sLine = streamIn.readLine();
@@ -105,8 +113,8 @@ YaParseFiles::parseFile(const QString &sFileName)
                 //qDebug() << "line" << sLine;
                 //qDebug() << "test name" << sLine.right(sLine.length() -13);
                 if (countClOutOfRes==0){
-                    sTestName.clear();
-                    sTestName.append(sLine.right(sLine.length() -13));
+                    sCvTestName.clear();
+                    sCvTestName.append(sLine.right(sLine.length() -13));
                 }
                 if (!streamIn.atEnd()){
                     QString sLineNext = streamIn.readLine();
@@ -136,14 +144,18 @@ YaParseFiles::parseFile(const QString &sFileName)
                                                  -sFileName.lastIndexOf("/")-1);
                     }
                     isManyCLErrorsInFile = true;
-                    qDebug() << "test: " << sTestName;
+                    qDebug() << "test: " << sCvTestName;
+                    addUniqueCvMethod(sCvTestName);
                     for (int i=0; i< slTestCLError.length(); i++) {
-                        qDebug() << "error:" << slTestCLError.at(i).right(
-                                        slTestCLError.at(i).length() - 2
-                                        - slTestCLError.at(i).lastIndexOf(":"));
+                        sClErrorName.append(slTestCLError.at(i).right(
+                                            slTestCLError.at(i).length() - 2
+                                            - slTestCLError.at(i).lastIndexOf(":")));
+                        qDebug() << "error:" << sClErrorName;
+                        addUniqueClError(sClErrorName);
+                        sClErrorName.clear();
                     }
                     qDebug() << "num:   " << countClOutOfRes;
-                    sTestName.clear();
+                    sCvTestName.clear();
                     slTestCLError.clear();
                     countClOutOfRes = 0;
                 }
@@ -152,5 +164,47 @@ YaParseFiles::parseFile(const QString &sFileName)
         }
     } else {
         qWarning() << "file" << sFileName << "not found";
+    }
+}
+
+void
+YaParseFiles::addUniqueCvMethod(const QString &cvMethod)
+{
+    if (!_slUniqueCvMethods->contains(cvMethod))
+        _slUniqueCvMethods->append(cvMethod);
+}
+
+void
+YaParseFiles::addUniqueClError(const QString &clError)
+{
+    if (!_slUniqueClErrors->contains(clError))
+        _slUniqueClErrors->append(clError);
+}
+
+void
+YaParseFiles::dumpMethodsErrorsToFile(const QString sFileName)
+{
+    QFile outCvMethods;
+    QFile outClErrors;
+    outCvMethods.setFileName(QString(sFileName+"CvMethods.txt"));
+    outClErrors.setFileName(QString(sFileName+"ClErrors.txt"));
+
+    if (outCvMethods.open(QFile::WriteOnly|QFile::Truncate)){
+        QTextStream outCv(&outCvMethods);
+        outCv << "#" << _slUniqueCvMethods->length() << "\n";
+        for (int i=0; i<_slUniqueCvMethods->length(); i++){
+            outCv << _slUniqueCvMethods->at(i) << "\n";
+        }
+        outCvMethods.flush();
+        outCvMethods.close();
+    }
+    if (outClErrors.open(QFile::WriteOnly|QFile::Truncate)){
+        QTextStream outCl(&outClErrors);
+        outCl << "#" << _slUniqueClErrors->length() << "\n";
+        for (int i=0; i<_slUniqueClErrors->length(); i++){
+            outCl << _slUniqueClErrors->at(i) << "\n";
+        }
+        outClErrors.flush();
+        outClErrors.close();
     }
 }
