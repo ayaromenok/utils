@@ -19,14 +19,17 @@ private:
     void            addFileList();
     void            parseFileList();
     void            parseFile(const QString &sFileName);
-    void            addUniqueCvMethod(const QString &cvMethod);
-    void            addUniqueClError(const QString &clError);
+    void            addUniqueCvMethods(const QString &cvMethod);
+    void            addUniqueClErrors(const QString &clError);
+    void            addNotUniqueClErrors();
     void            dumpMethodsErrorsToFile(const QString sFileName = "out");
     QString*        _sArchDir;
     QStringList*    _slConfDirs;
     QStringList*    _slFileList;
-    QStringList*    _slUniqueClErrors;
     QStringList*    _slUniqueCvMethods;
+    QStringList*    _slUniqueClErrors;
+    QStringList*    _slNotUniqueClErrors;
+    QVector<int>*   _vNotUniqueClErrorsCount;
 };
 
 #endif // YAPARSEFILES_H
